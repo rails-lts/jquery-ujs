@@ -29,6 +29,25 @@ asyncTest('link with "data-method" set to "delete"', 3, function() {
   });
 });
 
+asyncTest('do not interact with contenteditable elements', 0, function() {
+  $('#qunit-fixture')
+    .replaceWith(`
+      <div id="qunit-fixture">
+        <div contenteditable>
+          <a href="/echo" data-method="delete">link</a>
+        </div>
+      </div>`
+    )
+  
+  $(document).on('iframe:loaded', function(e, data) {
+    ok(false, 'Should not trigger a request because of contenteditable parent')
+  });
+
+  $('#qunit-fixture').find('a').trigger('click');
+
+  setTimeout(function(){ start(); }, 50);
+})
+
 asyncTest('link with "data-method" and CSRF', 1, function() {
   $('#qunit-fixture')
     .append('<meta name="csrf-param" content="authenticity_token"/>')

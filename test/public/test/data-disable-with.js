@@ -117,6 +117,30 @@ asyncTest('form input[type=submit][data-disable-with] disables', 6, function(){
   }, 30);
 });
 
+asyncTest('form button with "data-disable-with" attribute and contenteditable is not modified', 6, function() {
+  $("#qunit-fixture").replaceWith(`
+    <div id="qunit-fixture">
+      <div contenteditable>
+        <form data-remote>
+          <button data-disable-with="submitting ...">Submit</button>
+        </form>
+      </div>
+    </div>
+  `)
+
+  var button = $('#qunit-fixture').find('button')
+  var form = $('#qunit-fixture').find('form')
+  App.checkEnabledState(button, 'Submit')
+
+  setTimeout(function() {
+    App.checkEnabledState(button, 'Submit')
+    start()
+  }, 13)
+  form.trigger('submit')
+
+  App.checkEnabledState(button, 'Submit');
+});
+
 test('form input[type=submit][data-disable-with] re-enables when `pageshow` event is triggered', function(){
   var form = $('form:not([data-remote])'), input = form.find('input[type=submit]');
 

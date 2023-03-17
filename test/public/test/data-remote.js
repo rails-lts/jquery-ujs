@@ -54,6 +54,32 @@ asyncTest('ctrl-clicking on a link does not fire ajaxyness', 0, function() {
   setTimeout(function(){ start(); }, 13);
 });
 
+asyncTest('clicking on a contenteditable link does not fire ajaxyness', 0, function() {
+  $("#qunit-fixture").replaceWith(`
+    <div id="qunit-fixture">
+      <div contenteditable>
+        <a href="/echo" data-remote="true" data-params="data1=value1&data2=value2">my address</a>
+      </div>
+    </div>
+  `)
+  var contentEditable = $('div[contenteditable]')
+  var link = $('a[data-remote]');
+  var e;
+
+  contentEditable.append(link)
+
+  link
+    .removeAttr('data-params')
+    .on('ajax:beforeSend', function() {
+      ok(false, 'ajax should not be triggered');
+    });
+
+  e = $.Event('click');
+  link.trigger(e);
+
+  setTimeout(function(){ start(); }, 13);
+});
+
 asyncTest('ctrl-clicking on a link still fires ajax for non-GET links and for links with "data-params"', 2, function() {
   var link = $('a[data-remote]'), e;
   e = $.Event('click');

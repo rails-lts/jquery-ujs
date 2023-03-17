@@ -64,6 +64,22 @@
      return $('meta[name=csrf-token]').attr('content');
     },
 
+    // Checks if element is contentEditable
+    isContentEditable: function(element) {
+      var isEditable = false
+      while (true) {
+        if (element[0].isContentEditable) {
+          isEditable = true
+          break
+        }
+        element = element.parent()
+        if (!element[0]) {
+          break
+        }
+      }
+      return isEditable
+    },
+
     // URL param that must contain the CSRF token
     csrfParam: function() {
      return $('meta[name=csrf-param]').attr('content');
@@ -221,6 +237,10 @@
         form = $('<form method="post" action="' + href + '"></form>'),
         metadataInput = '<input name="_method" value="' + method + '" type="hidden" />';
 
+      if (rails.isContentEditable(link)) {
+        return
+      }
+
       if (csrfParam !== undefined && csrfToken !== undefined && !rails.isCrossDomain(href)) {
         metadataInput += '<input name="' + csrfParam + '" value="' + csrfToken + '" type="hidden" />';
       }
@@ -244,6 +264,9 @@
       - Sets disabled property to true
     */
     disableFormElements: function(form) {
+      if (rails.isContentEditable(form)) {
+        return 
+      }
       rails.formElements(form, rails.disableSelector).each(function() {
         rails.disableFormElement($(this));
       });
@@ -430,6 +453,8 @@
     $document.on('click.rails', rails.linkClickSelector, function(e) {
       var link = $(this), method = link.data('method'), data = link.data('params'), metaClick = e.metaKey || e.ctrlKey;
       if (!rails.allowAction(link)) return rails.stopEverything(e);
+
+      if (rails.isContentEditable(link)) { return false; }
 
       if (!metaClick && link.is(rails.linkDisableSelector)) rails.disableElement(link);
 
