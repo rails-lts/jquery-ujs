@@ -127,6 +127,8 @@
     handleRemote: function(element) {
       var method, url, data, withCredentials, dataType, options;
 
+      // TK: Probably want to check here directly
+
       if (rails.fire(element, 'ajax:before')) {
         withCredentials = element.data('with-credentials') || null;
         dataType = element.data('type') || ($.ajaxSettings && $.ajaxSettings.dataType);
@@ -265,7 +267,7 @@
     */
     disableFormElements: function(form) {
       if (rails.isContentEditable(form)) {
-        return 
+        return;
       }
       rails.formElements(form, rails.disableSelector).each(function() {
         rails.disableFormElement($(this));
@@ -274,6 +276,8 @@
 
     disableFormElement: function(element) {
       var method, replacement;
+
+      // TK: check here, too. This method is sometimes called outside of `disableFormElements()`
 
       method = element.is('button') ? 'html' : 'val';
       replacement = element.data('disable-with');
@@ -299,6 +303,8 @@
 
     enableFormElement: function(element) {
       var method = element.is('button') ? 'html' : 'val';
+      // TK: this looks dangerous too, should probably do our regular check too
+      // (.data() also returns data- attributes)
       if (element.data('ujs:enable-with') !== undefined) {
         element[method](element.data('ujs:enable-with'));
         element.removeData('ujs:enable-with'); // clean up cache
@@ -393,6 +399,8 @@
     disableElement: function(element) {
       var replacement = element.data('disable-with');
 
+      // TK: Check here too?
+
       if (replacement !== undefined) {
         element.data('ujs:enable-with', element.html()); // store enabled state
         element.html(replacement);
@@ -406,6 +414,8 @@
 
     // Restore element to its original state which was disabled by 'disableElement' above
     enableElement: function(element) {
+      // TK: this looks dangerous too, should probably do our regular check too
+      // (.data() also returns data- attributes)
       if (element.data('ujs:enable-with') !== undefined) {
         element.html(element.data('ujs:enable-with')); // set to old enabled state
         element.removeData('ujs:enable-with'); // clean up cache
@@ -454,6 +464,7 @@
       var link = $(this), method = link.data('method'), data = link.data('params'), metaClick = e.metaKey || e.ctrlKey;
       if (!rails.allowAction(link)) return rails.stopEverything(e);
 
+      // TK: should we move this to handleRemote / the other dangerous methods?
       if (rails.isContentEditable(link)) { return false; }
 
       if (!metaClick && link.is(rails.linkDisableSelector)) rails.disableElement(link);
@@ -481,6 +492,8 @@
 
       if (!rails.allowAction(button) || !rails.isRemote(button)) return rails.stopEverything(e);
 
+      // TK: this is dangerous, too (but probably not once we fixed all the lower-level method)
+
       if (button.is(rails.buttonDisableSelector)) rails.disableFormElement(button);
 
       var handleRemote = rails.handleRemote(button);
@@ -497,6 +510,8 @@
       var link = $(this);
       if (!rails.allowAction(link) || !rails.isRemote(link)) return rails.stopEverything(e);
 
+      // TK: this is dangerous, too (but probably not once we fixed all the lower-level method)
+
       rails.handleRemote(link);
       return false;
     });
@@ -508,6 +523,8 @@
         nonBlankFileInputs;
 
       if (!rails.allowAction(form)) return rails.stopEverything(e);
+
+      // TK: this is dangerous, too (but probably not once we fixed all the lower-level method)
 
       // Skip other logic when required values are missing or file upload is present
       if (form.attr('novalidate') === undefined) {
@@ -550,6 +567,10 @@
       var button = $(this);
 
       if (!rails.allowAction(button)) return rails.stopEverything(event);
+
+      // TK: I think this could potentially be abusable as well, if the contenteditable is somehow
+      // part of a form. This could change the form's action by adding a button with a `formaction` attr
+      // within the contenteditable (if browsers allow that).
 
       // Register the pressed submit button
       var name = button.attr('name'),
