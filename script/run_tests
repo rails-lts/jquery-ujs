@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.expand_path('../../test', __FILE__)
+
+ENV['APP_ENV'] = 'test'
+
+require "capybara"
+require "capybara/dsl"
+require "capybara/minitest"
+require "minitest/autorun"
+require "byebug"
+require "server"
+
+class TestRunner < Minitest::Test
+  include Capybara::DSL
+  include Capybara::Minitest::Assertions
+
+  Capybara.default_driver = !!ENV['NO_HEADLESS'] ? :selenium_chrome : :selenium_chrome_headless
+  Capybara.server = :puma, { Silent: true }
+
+  def setup
+    Capybara.app = Sinatra::Application.new
+  end
+
+  if ENV.fetch("VERSIONS", '').split(',').count > 0
+    ALL_TESTED_VERSIONS = ENV["VERSIONS"].split(',')
+    raise "You're trying to test against a unsupported version" if (ALL_TESTED_VERSIONS - JQUERY_VERSIONS).count > 0
+  else
+    ALL_TESTED_VERSIONS = JQUERY_VERSIONS.dup
+  end
+
+  ALL_TESTED_VERSIONS.each do |version|
+    define_method("test_jquery_#{version}_suite_passes") do
+      visit "/?version=#{version}"
+      assert_no_selector "#qunit-banner.qunit-fail", wait: 20
+      assert_selector "#qunit-banner.qunit-pass", wait: 20
+    end
+  end
+end

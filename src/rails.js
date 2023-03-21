@@ -64,6 +64,22 @@
      return $('meta[name=csrf-token]').attr('content');
     },
 
+    // Checks if element is contentEditable
+    isContentEditable: function(element) {
+      var isEditable = false
+      while (true) {
+        if (element[0].isContentEditable) {
+          isEditable = true
+          break
+        }
+        element = element.parent()
+        if (!element[0]) {
+          break
+        }
+      }
+      return isEditable
+    },
+
     // URL param that must contain the CSRF token
     csrfParam: function() {
      return $('meta[name=csrf-param]').attr('content');
@@ -110,6 +126,8 @@
     // Submits "remote" forms and links with ajax
     handleRemote: function(element) {
       var method, url, data, withCredentials, dataType, options;
+
+      if (rails.isContentEditable(element)) return;
 
       if (rails.fire(element, 'ajax:before')) {
         withCredentials = element.data('with-credentials') || null;
@@ -221,6 +239,8 @@
         form = $('<form method="post" action="' + href + '"></form>'),
         metadataInput = '<input name="_method" value="' + method + '" type="hidden" />';
 
+      if (rails.isContentEditable(link)) return;
+
       if (csrfParam !== undefined && csrfToken !== undefined && !rails.isCrossDomain(href)) {
         metadataInput += '<input name="' + csrfParam + '" value="' + csrfToken + '" type="hidden" />';
       }
@@ -244,6 +264,8 @@
       - Sets disabled property to true
     */
     disableFormElements: function(form) {
+      if (rails.isContentEditable(form)) return;
+
       rails.formElements(form, rails.disableSelector).each(function() {
         rails.disableFormElement($(this));
       });
@@ -251,6 +273,8 @@
 
     disableFormElement: function(element) {
       var method, replacement;
+
+      if (rails.isContentEditable(element)) return;
 
       method = element.is('button') ? 'html' : 'val';
       replacement = element.data('disable-with');
@@ -269,12 +293,16 @@
       - Sets disabled property to false
     */
     enableFormElements: function(form) {
+      if (rails.isContentEditable(form)) return;
+
       rails.formElements(form, rails.enableSelector).each(function() {
         rails.enableFormElement($(this));
       });
     },
 
     enableFormElement: function(element) {
+      if (rails.isContentEditable(element)) return;
+
       var method = element.is('button') ? 'html' : 'val';
       if (element.data('ujs:enable-with') !== undefined) {
         element[method](element.data('ujs:enable-with'));
@@ -368,6 +396,8 @@
     //  Replace element's html with the 'data-disable-with' after storing original html
     //  and prevent clicking on it
     disableElement: function(element) {
+      if (rails.isContentEditable(element)) return;
+
       var replacement = element.data('disable-with');
 
       if (replacement !== undefined) {
@@ -383,6 +413,8 @@
 
     // Restore element to its original state which was disabled by 'disableElement' above
     enableElement: function(element) {
+      if (rails.isContentEditable(element)) return;
+
       if (element.data('ujs:enable-with') !== undefined) {
         element.html(element.data('ujs:enable-with')); // set to old enabled state
         element.removeData('ujs:enable-with'); // clean up cache
@@ -431,6 +463,8 @@
       var link = $(this), method = link.data('method'), data = link.data('params'), metaClick = e.metaKey || e.ctrlKey;
       if (!rails.allowAction(link)) return rails.stopEverything(e);
 
+      if (rails.isContentEditable(link)) return false;
+
       if (!metaClick && link.is(rails.linkDisableSelector)) rails.disableElement(link);
 
       if (rails.isRemote(link)) {
@@ -456,6 +490,8 @@
 
       if (!rails.allowAction(button) || !rails.isRemote(button)) return rails.stopEverything(e);
 
+      if (rails.isContentEditable(button)) return false;
+
       if (button.is(rails.buttonDisableSelector)) rails.disableFormElement(button);
 
       var handleRemote = rails.handleRemote(button);
@@ -472,6 +508,8 @@
       var link = $(this);
       if (!rails.allowAction(link) || !rails.isRemote(link)) return rails.stopEverything(e);
 
+      if (rails.isContentEditable(link)) return false;
+
       rails.handleRemote(link);
       return false;
     });
@@ -483,6 +521,8 @@
         nonBlankFileInputs;
 
       if (!rails.allowAction(form)) return rails.stopEverything(e);
+
+      if (rails.isContentEditable(form)) return false;
 
       // Skip other logic when required values are missing or file upload is present
       if (form.attr('novalidate') === undefined) {
@@ -525,6 +565,8 @@
       var button = $(this);
 
       if (!rails.allowAction(button)) return rails.stopEverything(event);
+
+      if (rails.isContentEditable(button)) return false;
 
       // Register the pressed submit button
       var name = button.attr('name'),
