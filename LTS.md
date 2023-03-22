@@ -32,3 +32,12 @@ $VERSIONS=1.8.0,1.8.1 script/run_tests
 # Runs suite with :selenium-chrome
 $NO_HEADLESS=1 script/run_tests
 ```
+
+## Releasing a new patch version
+
+Running `npm version patch -m 'Upgrade to %s for CVE-1234'` will:
+
+1. Execute all tests
+2. Create a patch version bump commit
+3. Push the commit
+4. Publish the package

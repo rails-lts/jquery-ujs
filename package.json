@@ -1,10 +1,10 @@
 {
-  "name": "jquery-ujs",
+  "name": "@railslts/jquery-ujs",
   "version": "1.2.3",
   "description": "Unobtrusive scripting adapter for jQuery",
   "main": "src/rails.js",
   "scripts": {
-    "test": "echo \"See the wiki: https://github.com/rails/jquery-ujs/wiki/Running-Tests-and-Contributing\" && exit 1",
+    "preversion": "./script/run_tests",
     "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {

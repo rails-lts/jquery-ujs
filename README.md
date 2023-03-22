@@ -1,3 +1,7 @@
+# Rails-LTS fork
+
+Please see [LTS](LTS) for details.
+
 Unobtrusive scripting adapter for jQuery
 ========================================
 

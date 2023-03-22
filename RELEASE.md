@@ -1,3 +1,7 @@
+# Rails LTS fork
+
+Please see [LTS](LTS) for LTS release details.
+
 ## Releasing jquery-ujs
 
 ### Releasing to npm
