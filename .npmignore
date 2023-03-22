@@ -2,3 +2,4 @@ script/
 test/
 Rakefile
 Gemfile*
+.byebug_history
