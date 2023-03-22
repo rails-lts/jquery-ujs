@@ -1,6 +1,6 @@
 # Rails LTS fork
 
-Please see [LTS](LTS) for LTS release details.
+Please see [LTS](LTS.md) for LTS release details.
 
 ## Releasing jquery-ujs
 
